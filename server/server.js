@@ -4,7 +4,7 @@ const { typeDefs, resolvers } = require("./schemas");
 const { authMiddleware } = require("./utils/auth");
 const path = require("path");
 const db = require("./config/connection");
-const routes = require("./routes");
+
 const server = new ApolloServer({
   typeDefs: typeDefs,
   resolvers: resolvers,
@@ -26,7 +26,7 @@ const startApolloServer = async () => {
 if (process.env.NODE_ENV === "production") {
   app.use(express.static(path.join(__dirname, "../client/build")));
 }
-app.use(routes);
+
 startApolloServer(typeDefs, resolvers);
 
 db.once("open", () => {

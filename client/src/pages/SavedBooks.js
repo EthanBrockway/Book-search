@@ -1,7 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
-import { useQuery } from "@apollo/client";
-import { GET_ME } from "../utils/queries";
 import {
   Jumbotron,
   Container,
@@ -9,22 +6,28 @@ import {
   Card,
   Button,
 } from "react-bootstrap";
-
+import { GET_ME } from "../utils/queries";
 import { getMe, deleteBook } from "../utils/API";
 import Auth from "../utils/auth";
 import { removeBookId } from "../utils/localStorage";
+import { useQuery } from "@apollo/client";
 
 const SavedBooks = () => {
-  const { username: userParams } = useParams();
+  // const [userData, setUserData] = useState({});
+
+  // use this to determine if `useEffect()` hook needs to run again
+  // const userDataLength = Object.keys(userData).length;
+
+  const token = Auth.loggedIn() ? Auth.getToken() : null;
+
   const { loading, data } = useQuery(GET_ME, {
-    variables: { username: userParams },
+    context: {
+      headers: {
+        authorization: token ? `Bearer ${token}` : "",
+      },
+    },
   });
-
-  const userData = data?.user || {};
-
-  if (!loading) {
-    return <div>Loading...</div>;
-  }
+  let books = data?.me || data?.user || {};
 
   // create function that accepts the book's mongo _id value as param and deletes the book from the database
   // const handleDeleteBook = async (bookId) => {
@@ -51,9 +54,9 @@ const SavedBooks = () => {
   // };
 
   // if data isn't here yet, say so
-  if (!userData.Length) {
-    return <h2>LOADING...</h2>;
-  }
+  // if (!userDataLength) {
+  //   return <h2>LOADING...</h2>;
+  // }
 
   return (
     <>
@@ -62,16 +65,17 @@ const SavedBooks = () => {
           <h1>Viewing saved books!</h1>
         </Container>
       </Jumbotron>
+
       <Container>
         <h2>
-          {userData.savedBooks.length
-            ? `Viewing ${userData.savedBooks.length} saved ${
-                userData.savedBooks.length === 1 ? "book" : "books"
+          {books.savedBooks.length
+            ? `Viewing ${books.savedBooks.length} saved ${
+                books.savedBooks.length === 1 ? "book" : "books"
               }:`
             : "You have no saved books!"}
         </h2>
         <CardColumns>
-          {userData.savedBooks.map((book) => {
+          {books.savedBooks.map((book) => {
             return (
               <Card key={book.bookId} border="dark">
                 {book.image ? (
