@@ -7,20 +7,25 @@ import {
   Button,
 } from "react-bootstrap";
 
-import { getMe, deleteBook } from "../utils/API";
 import Auth from "../utils/auth";
 import { removeBookId } from "../utils/localStorage";
 import { GET_ME } from "../utils/queries";
-import { useQuery } from "@apollo/client";
+import { REMOVE_BOOK } from "../utils/mutations";
+import { useQuery, useMutation } from "@apollo/client";
 
 const SavedBooks = () => {
-  // use this to determine if `useEffect()` hook needs to run again
-
   const token = Auth.loggedIn() ? Auth.getToken() : null;
-
-  const { data: userData } = useQuery(GET_ME, {
+  // use this to determine if `useEffect()` hook needs to run again
+  const { loading, data, error } = useQuery(GET_ME, {
     context: { headers: { authorization: `Bearer ${token}` } },
   });
+  const [removeBook] = useMutation(REMOVE_BOOK);
+
+  if (loading) return "loading...";
+  if (error) return "error";
+
+  let userData = data;
+  console.log(data);
 
   // create function that accepts the book's mongo _id value as param and deletes the book from the database
   const handleDeleteBook = async (bookId) => {
@@ -30,26 +35,15 @@ const SavedBooks = () => {
       return false;
     }
 
-    try {
-      const response = await deleteBook(bookId, token);
+    const user2 = await removeBookId({
+      variables: {
+        bookId: bookId,
+      },
+    });
+    userData = user2.data.user;
 
-      if (!response.ok) {
-        throw new Error("something went wrong!");
-      }
-
-      const updatedUser = await response.json();
-
-      // upon success, remove book's id from localStorage
-      removeBookId(bookId);
-    } catch (err) {
-      console.error(err);
-    }
+    removeBookId(bookId);
   };
-
-  // if data isn't here yet, say so
-  if (!userDataLength) {
-    return <h2>LOADING...</h2>;
-  }
 
   return (
     <>
@@ -60,14 +54,17 @@ const SavedBooks = () => {
       </Jumbotron>
       <Container>
         <h2>
-          {userData.savedBooks.length
+          {/* {userData.savedBooks.length
             ? `Viewing ${userData.savedBooks.length} saved ${
                 userData.savedBooks.length === 1 ? "book" : "books"
               }:`
-            : "You have no saved books!"}
+            : "You have no saved books!"} */}
+          Not working because .length and .map cannot be used on empty objects
+          and for some reason my userData displays an empty object before it
+          displays the good one.
         </h2>
         <CardColumns>
-          {userData.savedBooks.map((book) => {
+          {/* {userData.savedBooks.map((book) => {
             return (
               <Card key={book.bookId} border="dark">
                 {book.image ? (
@@ -90,7 +87,7 @@ const SavedBooks = () => {
                 </Card.Body>
               </Card>
             );
-          })}
+          })} */}
         </CardColumns>
       </Container>
     </>
