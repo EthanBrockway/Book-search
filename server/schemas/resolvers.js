@@ -20,7 +20,37 @@ const resolvers = {
     },
   },
   Mutation: {
-    login: async (parents, { email, password }) => {
+    saveBook: async (
+      parent,
+      { authors, description, title, bookId, image, link },
+      context
+    ) => {
+      if (context.user) {
+        try {
+          const updatedUser = await User.findOneAndUpdate(
+            { _id: context.user._id },
+            {
+              $addToSet: {
+                savedBooks: {
+                  authors,
+                  description,
+                  title,
+                  bookId,
+                  image,
+                  link,
+                },
+              },
+            }
+          );
+          return updatedUser;
+        } catch (error) {
+          console.log(error);
+        }
+      }
+      throw new AuthenticationError("You need to be logged in!");
+    },
+
+    login: async (parent, { email, password }) => {
       const user = await User.findOne({ email });
 
       if (!user) {
