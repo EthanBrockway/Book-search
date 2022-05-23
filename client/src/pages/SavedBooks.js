@@ -24,7 +24,7 @@ const SavedBooks = () => {
   if (loading) return "loading...";
   if (error) return "error";
 
-  let userData = data;
+  let userData = data.me;
   console.log(data);
 
   // create function that accepts the book's mongo _id value as param and deletes the book from the database
@@ -54,17 +54,14 @@ const SavedBooks = () => {
       </Jumbotron>
       <Container>
         <h2>
-          {/* {userData.savedBooks.length
+          {userData.savedBooks.length
             ? `Viewing ${userData.savedBooks.length} saved ${
                 userData.savedBooks.length === 1 ? "book" : "books"
               }:`
-            : "You have no saved books!"} */}
-          Not working because .length and .map cannot be used on empty objects
-          and for some reason my userData displays an empty object before it
-          displays the good one.
+            : "You have no saved books!"}
         </h2>
         <CardColumns>
-          {/* {userData.savedBooks.map((book) => {
+          {userData.savedBooks.map((book) => {
             return (
               <Card key={book.bookId} border="dark">
                 {book.image ? (
@@ -87,7 +84,7 @@ const SavedBooks = () => {
                 </Card.Body>
               </Card>
             );
-          })} */}
+          })}
         </CardColumns>
       </Container>
     </>
