@@ -19,7 +19,9 @@ const SavedBooks = () => {
   const { loading, data, error } = useQuery(GET_ME, {
     context: { headers: { authorization: `Bearer ${token}` } },
   });
-  const [removeBook] = useMutation(REMOVE_BOOK);
+  const [removeBook] = useMutation(REMOVE_BOOK, {
+    context: { headers: { authorization: `Bearer ${token}` } },
+  });
 
   if (loading) return "loading...";
   if (error) return "error";
@@ -35,12 +37,13 @@ const SavedBooks = () => {
       return false;
     }
 
-    const user2 = await removeBookId({
+    const updatedUser = await removeBook({
       variables: {
         bookId: bookId,
       },
     });
-    userData = user2.data.user;
+    console.log(updatedUser);
+    userData = updatedUser.data.user;
 
     removeBookId(bookId);
   };
@@ -54,14 +57,14 @@ const SavedBooks = () => {
       </Jumbotron>
       <Container>
         <h2>
-          {userData.savedBooks.length
-            ? `Viewing ${userData.savedBooks.length} saved ${
-                userData.savedBooks.length === 1 ? "book" : "books"
+          {userData?.savedBooks.length
+            ? `Viewing ${userData?.savedBooks.length} saved ${
+                userData?.savedBooks.length === 1 ? "book" : "books"
               }:`
             : "You have no saved books!"}
         </h2>
         <CardColumns>
-          {userData.savedBooks.map((book) => {
+          {userData?.savedBooks.map((book) => {
             return (
               <Card key={book.bookId} border="dark">
                 {book.image ? (
